@@ -301,6 +301,10 @@ Todas as rotas de API residem sob `src/app/api/` e utilizam JSON.
 
 ## 11. Histórico (Changelog)
 
+### [2026-07-25] — Otimização Mobile & PWA (Progressive Web App)
+* **Funcionalidades:** Suporte a PWA com `manifest.json`, cabeçalhos de viewport mobile (prevenção de zoom acidental ao tocar em formulários, suporte a telas Retina e iOS status bar), menu hamburguer responsivo e navegação fluida em dispositivos móveis.
+* **Arquivos alterados:** `src/app/layout.tsx`, `public/manifest.json`, `ANTIGRAVITY.md`
+
 ### [2026-07-25] — Auditoria e Preparação para Deploy Vercel & GitHub
 * **Funcionalidades:** Configuração de build automatizado com Prisma Client (`prisma generate && next build`), criação de `vercel.json`, `.gitignore` e `README.md`.
 * **Arquivos alterados:** `package.json`, `vercel.json`, `.gitignore`, `README.md`, `ANTIGRAVITY.md`
