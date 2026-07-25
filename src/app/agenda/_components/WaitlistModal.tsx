@@ -43,12 +43,14 @@ export const WaitlistModal: React.FC<WaitlistModalProps> = ({
     setPhone('');
   };
 
+  const inputClass = 'bg-slate-50 border border-slate-200 focus:border-brand-500 focus:bg-white rounded-xl p-2.5 text-xs font-medium text-slate-900 outline-none transition-all';
+
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="Lista de Espera & Encaixes" maxWidth="max-w-xl">
       <div className="space-y-6">
-        {/* Form to add to waitlist */}
-        <form onSubmit={handleSubmit} className="bg-slate-900 p-4 rounded-2xl border border-slate-800 space-y-3">
-          <h4 className="text-xs font-bold text-indigo-400 flex items-center gap-1.5">
+        {/* Add to waitlist form */}
+        <form onSubmit={handleSubmit} className="bg-slate-50 border border-slate-200 p-4 rounded-2xl space-y-3">
+          <h4 className="text-xs font-extrabold text-brand-700 flex items-center gap-1.5">
             <ListPlus className="w-4 h-4" /> Adicionar Cliente na Fila de Espera
           </h4>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -58,7 +60,7 @@ export const WaitlistModal: React.FC<WaitlistModalProps> = ({
               value={clientName}
               onChange={(e) => setClientName(e.target.value)}
               required
-              className="bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-xs text-white outline-none focus:border-indigo-500"
+              className={inputClass}
             />
             <input
               type="text"
@@ -66,60 +68,58 @@ export const WaitlistModal: React.FC<WaitlistModalProps> = ({
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
               required
-              className="bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-xs text-white outline-none focus:border-indigo-500"
+              className={inputClass}
             />
             <input
               type="date"
               value={preferredDate}
               onChange={(e) => setPreferredDate(e.target.value)}
               required
-              className="bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-xs text-white outline-none focus:border-indigo-500"
+              className={inputClass}
             />
             <select
               value={serviceName}
               onChange={(e) => setServiceName(e.target.value)}
               required
-              className="bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-xs text-white outline-none focus:border-indigo-500"
+              className={inputClass}
             >
               <option value="">Selecione o Serviço Desejado *</option>
               {services.map((s) => (
-                <option key={s.id} value={s.name}>
-                  {s.name}
-                </option>
+                <option key={s.id} value={s.name}>{s.name}</option>
               ))}
             </select>
           </div>
           <button
             type="submit"
-            className="w-full py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5"
+            className="w-full py-2 bg-brand-600 hover:bg-brand-700 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-all shadow-xs"
           >
             <Plus className="w-4 h-4" />
-            <span>Adicionar à Lista de Espera</span>
+            Adicionar à Lista de Espera
           </button>
         </form>
 
-        {/* Existing waitlist list */}
+        {/* Existing waitlist */}
         <div>
-          <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">
+          <h4 className="text-xs font-extrabold text-slate-500 uppercase tracking-wider mb-3">
             Clientes Aguardando Vaga ({waitlist.length})
           </h4>
           <div className="space-y-2 max-h-[300px] overflow-y-auto">
             {waitlist.length === 0 ? (
-              <p className="text-xs text-slate-500 text-center py-6">
+              <p className="text-xs text-slate-400 font-medium text-center py-6">
                 Nenhum cliente na fila de espera no momento.
               </p>
             ) : (
               waitlist.map((entry) => (
                 <div
                   key={entry.id}
-                  className="p-3 bg-slate-950/80 border border-slate-800 rounded-xl flex items-center justify-between gap-3 text-xs"
+                  className="p-3 bg-white border border-slate-200 rounded-xl flex items-center justify-between gap-3 text-xs shadow-xs"
                 >
                   <div>
-                    <h5 className="font-bold text-white">{entry.clientName}</h5>
-                    <p className="text-slate-400 mt-0.5">
-                      {entry.serviceName} • Data Desejada: {entry.preferredDate}
+                    <h5 className="font-black text-slate-900">{entry.clientName}</h5>
+                    <p className="text-slate-500 font-medium mt-0.5">
+                      {entry.serviceName} • Data: {entry.preferredDate}
                     </p>
-                    <p className="text-slate-500 text-[11px] font-mono mt-0.5">{entry.phone}</p>
+                    <p className="text-slate-400 font-mono text-[11px] mt-0.5">{entry.phone}</p>
                   </div>
                   <div className="flex items-center gap-2">
                     <button
@@ -127,13 +127,13 @@ export const WaitlistModal: React.FC<WaitlistModalProps> = ({
                         onConvertToAppointment(entry);
                         onClose();
                       }}
-                      className="px-2.5 py-1.5 bg-indigo-600/20 text-indigo-300 border border-indigo-500/30 rounded-lg text-xs font-semibold hover:bg-indigo-600 hover:text-white transition-all"
+                      className="px-2.5 py-1.5 bg-brand-50 text-brand-700 border border-brand-200 rounded-lg text-xs font-bold hover:bg-brand-600 hover:text-white hover:border-brand-600 transition-all"
                     >
                       Converter em Agendamento
                     </button>
                     <button
                       onClick={() => onDeleteWaitlist(entry.id)}
-                      className="p-1.5 text-rose-400 hover:bg-rose-500/10 rounded-lg"
+                      className="p-1.5 text-rose-500 hover:bg-rose-50 rounded-lg transition-colors"
                     >
                       <Trash2 className="w-3.5 h-3.5" />
                     </button>

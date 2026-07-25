@@ -45,7 +45,6 @@ export const CreateAppointmentModal: React.FC<CreateAppointmentModalProps> = ({
   const [notes, setNotes] = React.useState('');
   const [errorMessage, setErrorMessage] = React.useState('');
 
-  // Reset or pre-fill form on open
   React.useEffect(() => {
     if (isOpen) {
       if (duplicateApt) {
@@ -70,7 +69,6 @@ export const CreateAppointmentModal: React.FC<CreateAppointmentModalProps> = ({
   const selectedService = services.find((s) => s.id === serviceId);
   const servicePrice = selectedService ? selectedService.price : 0;
 
-  // Auto calculate end time
   const calculatedEndTime = React.useMemo(() => {
     const duration = selectedService ? selectedService.durationMin : 30;
     const [h, m] = startTime.split(':').map(Number);
@@ -106,6 +104,9 @@ export const CreateAppointmentModal: React.FC<CreateAppointmentModalProps> = ({
     }
   };
 
+  const inputClass = 'w-full bg-slate-50 border border-slate-200 focus:border-brand-500 focus:bg-white rounded-xl p-2.5 text-xs font-medium text-slate-900 outline-none transition-all';
+  const labelClass = 'text-xs font-bold text-slate-600 mb-1 flex items-center gap-1';
+
   return (
     <Modal
       isOpen={isOpen}
@@ -115,141 +116,90 @@ export const CreateAppointmentModal: React.FC<CreateAppointmentModalProps> = ({
     >
       <form onSubmit={handleSubmit} className="space-y-4">
         {errorMessage && (
-          <div className="p-3 bg-rose-500/10 border border-rose-500/30 rounded-xl text-xs text-rose-400">
+          <div className="p-3 bg-rose-50 border border-rose-200 rounded-xl text-xs font-semibold text-rose-700">
             {errorMessage}
           </div>
         )}
 
-        {/* Cliente */}
         <div>
-          <label className="text-xs font-semibold text-slate-300 mb-1 flex items-center gap-1">
-            <User className="w-3.5 h-3.5 text-indigo-400" /> Cliente *
+          <label className={labelClass}>
+            <User className="w-3.5 h-3.5 text-brand-600" /> Cliente *
           </label>
-          <select
-            value={clientId}
-            onChange={(e) => setClientId(e.target.value)}
-            required
-            className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-xs text-white outline-none focus:border-indigo-500"
-          >
+          <select value={clientId} onChange={(e) => setClientId(e.target.value)} required className={inputClass}>
             <option value="">Selecione o Cliente</option>
             {clients.map((c) => (
-              <option key={c.id} value={c.id}>
-                {c.name} ({c.phone})
-              </option>
+              <option key={c.id} value={c.id}>{c.name} ({c.phone})</option>
             ))}
           </select>
         </div>
 
-        {/* Servico */}
         <div>
-          <label className="text-xs font-semibold text-slate-300 mb-1 flex items-center gap-1">
-            <Scissors className="w-3.5 h-3.5 text-indigo-400" /> Serviço *
+          <label className={labelClass}>
+            <Scissors className="w-3.5 h-3.5 text-brand-600" /> Serviço *
           </label>
-          <select
-            value={serviceId}
-            onChange={(e) => setServiceId(e.target.value)}
-            required
-            className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-xs text-white outline-none focus:border-indigo-500"
-          >
+          <select value={serviceId} onChange={(e) => setServiceId(e.target.value)} required className={inputClass}>
             <option value="">Selecione o Serviço</option>
             {services.map((s) => (
-              <option key={s.id} value={s.id}>
-                {s.name} — {s.durationMin} min — R$ {s.price}
-              </option>
+              <option key={s.id} value={s.id}>{s.name} — {s.durationMin} min — R$ {s.price}</option>
             ))}
           </select>
         </div>
 
-        {/* Profissional */}
         <div>
-          <label className="text-xs font-semibold text-slate-300 mb-1 flex items-center gap-1">
-            <User className="w-3.5 h-3.5 text-indigo-400" /> Profissional *
+          <label className={labelClass}>
+            <User className="w-3.5 h-3.5 text-brand-600" /> Profissional *
           </label>
-          <select
-            value={staffId}
-            onChange={(e) => setStaffId(e.target.value)}
-            required
-            className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-xs text-white outline-none focus:border-indigo-500"
-          >
+          <select value={staffId} onChange={(e) => setStaffId(e.target.value)} required className={inputClass}>
             <option value="">Selecione o Profissional</option>
             {staffList.map((st) => (
-              <option key={st.id} value={st.id}>
-                {st.name} ({st.role})
-              </option>
+              <option key={st.id} value={st.id}>{st.name} ({st.role})</option>
             ))}
           </select>
         </div>
 
-        {/* Data & Horario Inicio */}
         <div className="grid grid-cols-2 gap-3">
           <div>
-            <label className="text-xs font-semibold text-slate-300 mb-1 flex items-center gap-1">
-              <Calendar className="w-3.5 h-3.5 text-indigo-400" /> Data *
+            <label className={labelClass}>
+              <Calendar className="w-3.5 h-3.5 text-brand-600" /> Data *
             </label>
-            <input
-              type="date"
-              value={date}
-              onChange={(e) => setDate(e.target.value)}
-              required
-              className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-xs text-white outline-none focus:border-indigo-500"
-            />
+            <input type="date" value={date} onChange={(e) => setDate(e.target.value)} required className={inputClass} />
           </div>
-
           <div>
-            <label className="text-xs font-semibold text-slate-300 mb-1 flex items-center gap-1">
-              <Clock className="w-3.5 h-3.5 text-indigo-400" /> Início *
+            <label className={labelClass}>
+              <Clock className="w-3.5 h-3.5 text-brand-600" /> Início *
             </label>
-            <input
-              type="time"
-              value={startTime}
-              onChange={(e) => setStartTime(e.target.value)}
-              required
-              className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-xs text-white outline-none focus:border-indigo-500"
-            />
+            <input type="time" value={startTime} onChange={(e) => setStartTime(e.target.value)} required className={inputClass} />
           </div>
         </div>
 
-        {/* Dynamic calculation banner */}
-        <div className="p-3 bg-slate-950/80 border border-slate-800/80 rounded-xl flex items-center justify-between text-xs text-slate-300">
+        {/* Auto calculation banner */}
+        <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl flex items-center justify-between text-xs font-semibold text-slate-700">
           <div>
-            <span>Término Estimado:</span>
-            <strong className="text-indigo-400 ml-1 font-mono">{calculatedEndTime}</strong>
+            Término Estimado: <strong className="text-brand-600 font-mono ml-1">{calculatedEndTime}</strong>
           </div>
           <div>
-            <span>Valor Total:</span>
-            <strong className="text-emerald-400 ml-1 font-mono">
-              R$ {servicePrice.toFixed(2)}
-            </strong>
+            Valor Total: <strong className="text-emerald-600 font-mono ml-1">R$ {servicePrice.toFixed(2)}</strong>
           </div>
         </div>
 
-        {/* Observações */}
         <div>
-          <label className="text-xs font-semibold text-slate-300 mb-1 flex items-center gap-1">
-            <FileText className="w-3.5 h-3.5 text-indigo-400" /> Observações Internas
+          <label className={labelClass}>
+            <FileText className="w-3.5 h-3.5 text-brand-600" /> Observações Internas
           </label>
           <textarea
             rows={2}
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
             placeholder="Alergias, preferências do cliente..."
-            className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-xs text-white outline-none focus:border-indigo-500"
+            className={inputClass}
           />
         </div>
 
-        {/* Modal Buttons */}
-        <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-800">
-          <button
-            type="button"
-            onClick={onClose}
-            className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold rounded-xl"
-          >
+        <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
+          <button type="button" onClick={onClose} className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl transition-colors">
             Cancelar
           </button>
-          <button
-            type="submit"
-            className="px-5 py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold rounded-xl shadow-lg shadow-indigo-600/20"
-          >
+          <button type="submit" className="px-5 py-2 bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold rounded-xl shadow-xs transition-all">
             Salvar Agendamento
           </button>
         </div>
