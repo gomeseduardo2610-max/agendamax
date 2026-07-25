@@ -9,10 +9,7 @@ import {
   Clock,
   Calendar,
   Scissors,
-  DollarSign,
   MessageCircle,
-  CheckCircle2,
-  XCircle,
   Trash2,
   Edit3,
 } from 'lucide-react';
@@ -58,62 +55,62 @@ export const AppointmentDetailModal: React.FC<AppointmentDetailModalProps> = ({
     <Modal isOpen={isOpen} onClose={onClose} title="Detalhes do Agendamento" maxWidth="max-w-lg">
       <div className="space-y-5">
         {/* Status Badge & Header */}
-        <div className="flex items-center justify-between bg-slate-900 p-3.5 rounded-2xl border border-slate-800">
+        <div className="flex items-center justify-between bg-slate-50 p-3.5 rounded-2xl border border-slate-200">
           <div>
-            <span className="text-[11px] text-slate-400 block mb-1">Status Atual</span>
+            <span className="text-[11px] text-slate-500 font-bold block mb-1">Status Atual</span>
             <Badge status={appointment.status} />
           </div>
           <div className="text-right">
-            <span className="text-[11px] text-slate-400 block">Valor do Serviço</span>
-            <span className="text-base font-bold text-emerald-400 font-mono">
+            <span className="text-[11px] text-slate-500 font-bold block">Valor do Serviço</span>
+            <span className="text-base font-black text-emerald-600 font-mono">
               R$ {appointment.price.toFixed(2)}
             </span>
           </div>
         </div>
 
         {/* Detailed Fields */}
-        <div className="space-y-3 bg-slate-950/60 p-4 rounded-2xl border border-slate-800/80 text-xs">
-          <div className="flex items-center justify-between py-1.5 border-b border-slate-800/60">
-            <span className="text-slate-400 flex items-center gap-1.5">
-              <User className="w-4 h-4 text-indigo-400" /> Cliente:
+        <div className="space-y-3 bg-white p-4 rounded-2xl border border-slate-200 text-xs shadow-xs">
+          <div className="flex items-center justify-between py-1.5 border-b border-slate-100">
+            <span className="text-slate-500 font-bold flex items-center gap-1.5">
+              <User className="w-4 h-4 text-brand-600" /> Cliente:
             </span>
-            <strong className="text-white text-sm">{client?.name || 'Desconhecido'}</strong>
+            <strong className="text-slate-900 text-sm">{client?.name || 'Desconhecido'}</strong>
           </div>
 
-          <div className="flex items-center justify-between py-1.5 border-b border-slate-800/60">
-            <span className="text-slate-400 flex items-center gap-1.5">
-              <Scissors className="w-4 h-4 text-indigo-400" /> Serviço:
+          <div className="flex items-center justify-between py-1.5 border-b border-slate-100">
+            <span className="text-slate-500 font-bold flex items-center gap-1.5">
+              <Scissors className="w-4 h-4 text-brand-600" /> Serviço:
             </span>
-            <span className="text-slate-200 font-medium">{service?.name || 'Serviço'}</span>
+            <span className="text-slate-800 font-bold">{service?.name || 'Serviço'}</span>
           </div>
 
-          <div className="flex items-center justify-between py-1.5 border-b border-slate-800/60">
-            <span className="text-slate-400 flex items-center gap-1.5">
-              <User className="w-4 h-4 text-indigo-400" /> Profissional:
+          <div className="flex items-center justify-between py-1.5 border-b border-slate-100">
+            <span className="text-slate-500 font-bold flex items-center gap-1.5">
+              <User className="w-4 h-4 text-brand-600" /> Profissional:
             </span>
-            <span className="text-slate-200 font-medium">{staff?.name || 'Profissional'}</span>
+            <span className="text-slate-800 font-bold">{staff?.name || 'Profissional'}</span>
           </div>
 
-          <div className="flex items-center justify-between py-1.5 border-b border-slate-800/60">
-            <span className="text-slate-400 flex items-center gap-1.5">
-              <Calendar className="w-4 h-4 text-indigo-400" /> Data:
+          <div className="flex items-center justify-between py-1.5 border-b border-slate-100">
+            <span className="text-slate-500 font-bold flex items-center gap-1.5">
+              <Calendar className="w-4 h-4 text-brand-600" /> Data:
             </span>
-            <span className="text-slate-200 font-mono">{appointment.date}</span>
+            <span className="text-slate-800 font-mono font-bold">{appointment.date}</span>
           </div>
 
           <div className="flex items-center justify-between py-1.5">
-            <span className="text-slate-400 flex items-center gap-1.5">
-              <Clock className="w-4 h-4 text-indigo-400" /> Horário:
+            <span className="text-slate-500 font-bold flex items-center gap-1.5">
+              <Clock className="w-4 h-4 text-brand-600" /> Horário:
             </span>
-            <span className="text-slate-200 font-mono font-bold">
+            <span className="text-slate-900 font-mono font-black">
               {formatTime(appointment.startTime)} às {formatTime(appointment.endTime)}
             </span>
           </div>
 
           {appointment.notes && (
-            <div className="pt-2 border-t border-slate-800/60">
-              <span className="text-slate-400 block mb-1">Observações Internas:</span>
-              <p className="text-slate-300 italic bg-slate-900 p-2 rounded-xl">
+            <div className="pt-2 border-t border-slate-100">
+              <span className="text-slate-500 font-bold block mb-1">Observações Internas:</span>
+              <p className="text-slate-700 italic bg-slate-50 p-2 rounded-xl border border-slate-200">
                 {appointment.notes}
               </p>
             </div>
@@ -122,16 +119,16 @@ export const AppointmentDetailModal: React.FC<AppointmentDetailModalProps> = ({
 
         {/* Quick Action Controls */}
         <div className="space-y-2">
-          <label className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider block">
+          <label className="text-[11px] font-extrabold text-slate-500 uppercase tracking-wider block">
             Alterar Status Rápido
           </label>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
             <button
               onClick={() => onUpdateStatus(appointment.id, 'SCHEDULED')}
-              className={`py-2 rounded-xl text-xs font-semibold border transition-all ${
+              className={`py-2 rounded-xl text-xs font-bold border transition-all ${
                 appointment.status === 'SCHEDULED'
-                  ? 'bg-amber-500/20 border-amber-500 text-amber-300'
-                  : 'bg-slate-900 border-slate-800 text-slate-400 hover:text-slate-200'
+                  ? 'bg-amber-100 border-amber-300 text-amber-900'
+                  : 'bg-slate-50 border-slate-200 text-slate-600 hover:text-slate-900'
               }`}
             >
               Agendado
@@ -139,10 +136,10 @@ export const AppointmentDetailModal: React.FC<AppointmentDetailModalProps> = ({
 
             <button
               onClick={() => onUpdateStatus(appointment.id, 'CONFIRMED')}
-              className={`py-2 rounded-xl text-xs font-semibold border transition-all ${
+              className={`py-2 rounded-xl text-xs font-bold border transition-all ${
                 appointment.status === 'CONFIRMED'
-                  ? 'bg-emerald-500/20 border-emerald-500 text-emerald-300'
-                  : 'bg-slate-900 border-slate-800 text-slate-400 hover:text-slate-200'
+                  ? 'bg-emerald-100 border-emerald-300 text-emerald-900'
+                  : 'bg-slate-50 border-slate-200 text-slate-600 hover:text-slate-900'
               }`}
             >
               Confirmado
@@ -150,10 +147,10 @@ export const AppointmentDetailModal: React.FC<AppointmentDetailModalProps> = ({
 
             <button
               onClick={() => onUpdateStatus(appointment.id, 'COMPLETED')}
-              className={`py-2 rounded-xl text-xs font-semibold border transition-all ${
+              className={`py-2 rounded-xl text-xs font-bold border transition-all ${
                 appointment.status === 'COMPLETED'
-                  ? 'bg-blue-500/20 border-blue-500 text-blue-300'
-                  : 'bg-slate-900 border-slate-800 text-slate-400 hover:text-slate-200'
+                  ? 'bg-blue-100 border-blue-300 text-blue-900'
+                  : 'bg-slate-50 border-slate-200 text-slate-600 hover:text-slate-900'
               }`}
             >
               Concluído
@@ -161,10 +158,10 @@ export const AppointmentDetailModal: React.FC<AppointmentDetailModalProps> = ({
 
             <button
               onClick={() => onUpdateStatus(appointment.id, 'CANCELLED')}
-              className={`py-2 rounded-xl text-xs font-semibold border transition-all ${
+              className={`py-2 rounded-xl text-xs font-bold border transition-all ${
                 appointment.status === 'CANCELLED'
-                  ? 'bg-rose-500/20 border-rose-500 text-rose-300'
-                  : 'bg-slate-900 border-slate-800 text-slate-400 hover:text-slate-200'
+                  ? 'bg-rose-100 border-rose-300 text-rose-900'
+                  : 'bg-slate-50 border-slate-200 text-slate-600 hover:text-slate-900'
               }`}
             >
               Cancelado
@@ -173,13 +170,13 @@ export const AppointmentDetailModal: React.FC<AppointmentDetailModalProps> = ({
         </div>
 
         {/* WhatsApp & Footer Actions */}
-        <div className="flex flex-wrap items-center justify-between gap-2 pt-3 border-t border-slate-800">
+        <div className="flex flex-wrap items-center justify-between gap-2 pt-3 border-t border-slate-200">
           {client?.phone ? (
             <a
               href={whatsappUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-semibold flex items-center gap-1.5 shadow-md"
+              className="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-xs"
             >
               <MessageCircle className="w-4 h-4" />
               <span>WhatsApp</span>
@@ -194,7 +191,7 @@ export const AppointmentDetailModal: React.FC<AppointmentDetailModalProps> = ({
                 onClose();
                 onOpenReschedule(appointment);
               }}
-              className="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-indigo-300 rounded-xl text-xs font-semibold flex items-center gap-1"
+              className="px-3 py-2 bg-slate-100 hover:bg-slate-200 text-brand-700 rounded-xl text-xs font-bold flex items-center gap-1 transition-colors"
             >
               <Edit3 className="w-3.5 h-3.5" />
               <span>Reagendar</span>
@@ -205,7 +202,7 @@ export const AppointmentDetailModal: React.FC<AppointmentDetailModalProps> = ({
                 onDelete(appointment.id);
                 onClose();
               }}
-              className="px-3 py-2 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 rounded-xl text-xs font-semibold flex items-center gap-1 border border-rose-500/20"
+              className="px-3 py-2 bg-rose-50 hover:bg-rose-100 text-rose-600 rounded-xl text-xs font-bold flex items-center gap-1 border border-rose-200 transition-colors"
             >
               <Trash2 className="w-3.5 h-3.5" />
               <span>Excluir</span>

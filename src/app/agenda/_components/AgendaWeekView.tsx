@@ -1,7 +1,8 @@
 import React from 'react';
 import { Appointment, Client, Staff, Service } from '@/lib/types';
-import { formatTime, getStatusStyle } from '@/lib/agenda-utils';
-import { Plus, Calendar, User, Scissors } from 'lucide-react';
+import { formatTime } from '@/lib/agenda-utils';
+import Badge from '@/components/ui/Badge';
+import { Plus } from 'lucide-react';
 
 interface AgendaWeekViewProps {
   selectedDateStr: string;
@@ -44,7 +45,7 @@ export const AgendaWeekView: React.FC<AgendaWeekViewProps> = ({
   const todayStr = new Date().toISOString().split('T')[0];
 
   return (
-    <div className="bg-slate-900/40 border border-slate-800/80 rounded-2xl p-4 lg:p-6 backdrop-blur-md overflow-x-auto">
+    <div className="bg-white border border-slate-200 rounded-2xl p-4 lg:p-6 shadow-xs overflow-x-auto">
       <div className="grid grid-cols-7 gap-3 min-w-[850px]">
         {weekDays.map(({ isoStr, name, dayNum }) => {
           const isSelected = isoStr === selectedDateStr;
@@ -59,34 +60,34 @@ export const AgendaWeekView: React.FC<AgendaWeekViewProps> = ({
               key={isoStr}
               className={`rounded-2xl border p-3 flex flex-col h-full min-h-[450px] transition-all ${
                 isToday
-                  ? 'bg-indigo-950/20 border-indigo-500/50 shadow-md shadow-indigo-500/5'
+                  ? 'bg-brand-50/50 border-brand-300 shadow-sm'
                   : isSelected
-                  ? 'bg-slate-900/90 border-slate-700'
-                  : 'bg-slate-950/60 border-slate-800/80'
+                  ? 'bg-slate-50 border-slate-300'
+                  : 'bg-slate-50/40 border-slate-200'
               }`}
             >
               {/* Day Header */}
               <div
                 onClick={() => onSelectDate(isoStr)}
-                className="cursor-pointer pb-2 mb-3 border-b border-slate-800 flex items-center justify-between group"
+                className="cursor-pointer pb-2 mb-3 border-b border-slate-200 flex items-center justify-between group"
               >
                 <div>
-                  <span className="text-[11px] uppercase font-bold text-slate-400 block tracking-wider">
+                  <span className="text-[11px] uppercase font-bold text-slate-500 block tracking-wider">
                     {name}
                   </span>
                   <span
-                    className={`text-lg font-extrabold ${
+                    className={`text-lg font-black ${
                       isToday
-                        ? 'text-indigo-400'
+                        ? 'text-brand-700'
                         : isSelected
-                        ? 'text-white'
-                        : 'text-slate-300 group-hover:text-white'
+                        ? 'text-slate-900'
+                        : 'text-slate-700 group-hover:text-brand-600'
                     }`}
                   >
                     {dayNum}
                   </span>
                 </div>
-                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-800 text-slate-400">
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-200 text-slate-700">
                   {dayApts.length}
                 </span>
               </div>
@@ -94,33 +95,35 @@ export const AgendaWeekView: React.FC<AgendaWeekViewProps> = ({
               {/* Day List Body */}
               <div className="flex-1 space-y-2 overflow-y-auto max-h-[500px] pr-1">
                 {dayApts.length === 0 ? (
-                  <div className="h-32 flex flex-col items-center justify-center text-slate-600 text-xs gap-1">
+                  <div className="h-32 flex flex-col items-center justify-center text-slate-400 text-xs font-medium">
                     <span>Sem horários</span>
                   </div>
                 ) : (
                   dayApts.map((apt) => {
                     const client = clients.find((c) => c.id === apt.clientId);
                     const service = services.find((s) => s.id === apt.serviceId);
-                    const statusInfo = getStatusStyle(apt.status);
 
                     return (
                       <div
                         key={apt.id}
                         onClick={() => onSelectAppointment(apt)}
-                        className={`p-2.5 rounded-xl border ${statusInfo.bg} cursor-pointer hover:scale-[1.02] transition-all shadow-sm`}
+                        className="p-2.5 rounded-xl border border-slate-200 bg-white hover:border-brand-300 cursor-pointer hover:scale-[1.02] transition-all shadow-xs"
                       >
-                        <div className="flex items-center justify-between text-[11px] font-mono font-bold text-slate-200">
+                        <div className="flex items-center justify-between text-[11px] font-mono font-bold text-slate-700">
                           <span>
                             {formatTime(apt.startTime)} - {formatTime(apt.endTime)}
                           </span>
-                          <span className="text-emerald-400">R${apt.price}</span>
+                          <span className="text-emerald-600 font-extrabold">R${apt.price}</span>
                         </div>
-                        <h6 className="text-xs font-bold text-white mt-1 truncate">
+                        <h6 className="text-xs font-black text-slate-900 mt-1 truncate">
                           {client?.name || 'Cliente'}
                         </h6>
-                        <p className="text-[10px] text-slate-400 truncate mt-0.5">
-                          {service?.name || 'Serviço'}
-                        </p>
+                        <div className="flex items-center justify-between mt-1">
+                          <p className="text-[10px] text-slate-500 font-medium truncate">
+                            {service?.name || 'Serviço'}
+                          </p>
+                          <Badge status={apt.status} />
+                        </div>
                       </div>
                     );
                   })
@@ -130,7 +133,7 @@ export const AgendaWeekView: React.FC<AgendaWeekViewProps> = ({
               {/* Add button for this day */}
               <button
                 onClick={() => onOpenCreateWithDate(isoStr)}
-                className="mt-3 w-full py-1.5 bg-slate-800/80 hover:bg-indigo-600 text-slate-300 hover:text-white rounded-xl text-xs font-semibold flex items-center justify-center gap-1 transition-all"
+                className="mt-3 w-full py-1.5 bg-white hover:bg-brand-600 text-slate-700 hover:text-white rounded-xl text-xs font-bold border border-slate-200 hover:border-brand-600 flex items-center justify-center gap-1 transition-all shadow-xs"
               >
                 <Plus className="w-3.5 h-3.5" />
                 <span>Agendar</span>

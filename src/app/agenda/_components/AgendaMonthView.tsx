@@ -63,11 +63,11 @@ export const AgendaMonthView: React.FC<AgendaMonthViewProps> = ({
   const weekHeaders = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
 
   return (
-    <div className="bg-slate-900/40 border border-slate-800/80 rounded-2xl p-4 lg:p-6 backdrop-blur-md">
+    <div className="bg-white border border-slate-200 rounded-2xl p-4 lg:p-6 shadow-xs">
       {/* Calendar Header */}
       <div className="grid grid-cols-7 gap-2 mb-2 text-center">
         {weekHeaders.map((dayName) => (
-          <div key={dayName} className="text-xs font-bold text-slate-400 py-2 uppercase tracking-wider">
+          <div key={dayName} className="text-xs font-bold text-slate-500 py-2 uppercase tracking-wider">
             {dayName}
           </div>
         ))}
@@ -87,31 +87,31 @@ export const AgendaMonthView: React.FC<AgendaMonthViewProps> = ({
             <div
               key={date}
               onClick={() => onSelectDate(date)}
-              className={`min-h-[100px] p-2 rounded-xl border flex flex-col justify-between cursor-pointer transition-all ${
+              className={`min-h-[100px] p-2 rounded-2xl border flex flex-col justify-between cursor-pointer transition-all ${
                 !isCurrentMonth
-                  ? 'bg-slate-950/30 border-slate-900/60 opacity-40 hover:opacity-80'
+                  ? 'bg-slate-50/50 border-slate-100 opacity-40 hover:opacity-80'
                   : isToday
-                  ? 'bg-indigo-950/30 border-indigo-500/60 shadow-lg shadow-indigo-500/10'
+                  ? 'bg-brand-50/40 border-brand-300 shadow-sm'
                   : isSelected
-                  ? 'bg-slate-800/90 border-slate-700'
-                  : 'bg-slate-950/60 border-slate-800/80 hover:border-slate-700'
+                  ? 'bg-slate-50 border-slate-300'
+                  : 'bg-white border-slate-200 hover:border-brand-200'
               }`}
             >
               <div className="flex items-center justify-between">
                 <span
-                  className={`text-sm font-bold ${
+                  className={`text-xs font-black ${
                     isToday
-                      ? 'w-6 h-6 rounded-full bg-indigo-600 text-white flex items-center justify-center text-xs'
+                      ? 'w-6 h-6 rounded-full bg-brand-600 text-white flex items-center justify-center text-xs shadow-xs'
                       : isCurrentMonth
-                      ? 'text-slate-200'
-                      : 'text-slate-500'
+                      ? 'text-slate-800'
+                      : 'text-slate-400'
                   }`}
                 >
                   {dayNum}
                 </span>
 
                 {dayApts.length > 0 && (
-                  <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
+                  <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-brand-100 text-brand-700 border border-brand-200">
                     {dayApts.length}
                   </span>
                 )}
@@ -120,12 +120,12 @@ export const AgendaMonthView: React.FC<AgendaMonthViewProps> = ({
               {/* Status pills inside month cell */}
               <div className="mt-2 space-y-1">
                 {scheduledCount > 0 && (
-                  <div className="text-[10px] bg-amber-500/10 text-amber-300 border border-amber-500/20 px-1.5 py-0.5 rounded truncate font-medium">
+                  <div className="text-[10px] bg-amber-50 text-amber-800 border border-amber-200 px-1.5 py-0.5 rounded-lg truncate font-bold">
                     {scheduledCount} agendados
                   </div>
                 )}
                 {completedCount > 0 && (
-                  <div className="text-[10px] bg-blue-500/10 text-blue-300 border border-blue-500/20 px-1.5 py-0.5 rounded truncate font-medium">
+                  <div className="text-[10px] bg-blue-50 text-blue-800 border border-blue-200 px-1.5 py-0.5 rounded-lg truncate font-bold">
                     {completedCount} concluídos
                   </div>
                 )}

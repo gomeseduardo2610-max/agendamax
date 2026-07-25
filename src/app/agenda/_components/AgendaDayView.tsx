@@ -1,8 +1,7 @@
 import React from 'react';
 import { Appointment, Client, Staff, Service, BlockedSlot } from '@/lib/types';
 import { AppointmentCard } from './AppointmentCard';
-import { formatTime } from '@/lib/agenda-utils';
-import { Clock, Plus, Ban, AlertCircle } from 'lucide-react';
+import { Ban, AlertCircle, Plus } from 'lucide-react';
 
 interface AgendaDayViewProps {
   selectedDateStr: string;
@@ -77,27 +76,27 @@ export const AgendaDayView: React.FC<AgendaDayViewProps> = ({
   }, [blockedSlots, selectedDateStr]);
 
   return (
-    <div className="bg-slate-900/40 border border-slate-800/80 rounded-2xl p-4 lg:p-6 backdrop-blur-md">
+    <div className="bg-white border border-slate-200 rounded-2xl p-4 lg:p-6 shadow-xs">
       {/* Current Time Indicator Bar if Today */}
       {isToday && (
-        <div className="mb-4 bg-indigo-500/10 border border-indigo-500/30 rounded-xl p-3 flex items-center justify-between">
-          <div className="flex items-center gap-2 text-indigo-300 text-xs font-semibold">
-            <span className="w-2.5 h-2.5 rounded-full bg-indigo-500 animate-ping"></span>
+        <div className="mb-4 bg-brand-50 border border-brand-200 rounded-xl p-3 flex items-center justify-between">
+          <div className="flex items-center gap-2 text-brand-700 text-xs font-bold">
+            <span className="w-2.5 h-2.5 rounded-full bg-brand-600 animate-ping"></span>
             <span>Horário Atual no Salão:</span>
-            <span className="text-sm font-mono font-bold text-white bg-indigo-950 px-2 py-0.5 rounded border border-indigo-800">
+            <span className="text-sm font-mono font-black text-brand-700 bg-white px-2 py-0.5 rounded-lg border border-brand-200 shadow-xs">
               {currentTimeStr}
             </span>
           </div>
-          <span className="text-[11px] text-slate-400">Linha de tempo em tempo real</span>
+          <span className="text-[11px] text-slate-500 font-medium">Linha de tempo em tempo real</span>
         </div>
       )}
 
       {/* Grid Header — Staff Columns */}
       <div className="overflow-x-auto pb-4">
         {filteredStaff.length === 0 ? (
-          <div className="text-center py-12 text-slate-400">
-            <AlertCircle className="w-8 h-8 text-amber-400 mx-auto mb-2" />
-            <p>Nenhum profissional cadastrado ou selecionado.</p>
+          <div className="text-center py-12 text-slate-500">
+            <AlertCircle className="w-8 h-8 text-amber-500 mx-auto mb-2" />
+            <p className="font-semibold text-sm">Nenhum profissional cadastrado ou selecionado.</p>
           </div>
         ) : (
           <div
@@ -107,7 +106,7 @@ export const AgendaDayView: React.FC<AgendaDayViewProps> = ({
             }}
           >
             {/* Header top-left empty corner */}
-            <div className="p-2 text-center text-xs font-bold text-slate-500 uppercase tracking-wider border-b border-slate-800">
+            <div className="p-2 text-center text-xs font-extrabold text-slate-400 uppercase tracking-wider border-b border-slate-200">
               Horário
             </div>
 
@@ -115,14 +114,14 @@ export const AgendaDayView: React.FC<AgendaDayViewProps> = ({
             {filteredStaff.map((staffMember) => (
               <div
                 key={staffMember.id}
-                className="p-2.5 text-center bg-slate-950/60 rounded-xl border border-slate-800 flex items-center justify-center gap-2"
+                className="p-2.5 text-center bg-slate-50 rounded-xl border border-slate-200 flex items-center justify-center gap-2"
               >
-                <div className="w-7 h-7 rounded-full bg-indigo-600/30 border border-indigo-500/40 text-indigo-300 font-bold text-xs flex items-center justify-center">
+                <div className="w-7 h-7 rounded-full bg-brand-100 border border-brand-200 text-brand-700 font-black text-xs flex items-center justify-center">
                   {staffMember.name.slice(0, 2).toUpperCase()}
                 </div>
                 <div className="text-left">
-                  <h5 className="text-xs font-bold text-slate-200 truncate">{staffMember.name}</h5>
-                  <p className="text-[10px] text-slate-400 truncate">{staffMember.role}</p>
+                  <h5 className="text-xs font-bold text-slate-900 truncate">{staffMember.name}</h5>
+                  <p className="text-[10px] text-slate-500 truncate font-medium">{staffMember.role}</p>
                 </div>
               </div>
             ))}
@@ -131,7 +130,7 @@ export const AgendaDayView: React.FC<AgendaDayViewProps> = ({
             {timeSlots.map((slotTime) => (
               <React.Fragment key={slotTime}>
                 {/* Time slot column */}
-                <div className="flex items-center justify-center text-xs font-mono text-slate-400 font-semibold border-t border-slate-800/60 py-4">
+                <div className="flex items-center justify-center text-xs font-mono text-slate-500 font-bold border-t border-slate-100 py-4">
                   {slotTime}
                 </div>
 
@@ -157,18 +156,18 @@ export const AgendaDayView: React.FC<AgendaDayViewProps> = ({
                   return (
                     <div
                       key={`${staffMember.id}-${slotTime}`}
-                      className="border-t border-slate-800/60 py-2 px-1 relative group min-h-[90px] transition-colors hover:bg-slate-800/30 rounded-lg"
+                      className="border-t border-slate-100 py-2 px-1 relative group min-h-[90px] transition-colors hover:bg-slate-50 rounded-xl"
                     >
                       {/* Blocked Slot View */}
                       {isBlocked ? (
-                        <div className="bg-amber-950/30 border border-amber-500/30 rounded-xl p-2.5 text-xs text-amber-300 flex items-center justify-between">
-                          <div className="flex items-center gap-1.5">
-                            <Ban className="w-3.5 h-3.5 text-amber-400" />
-                            <span className="font-semibold">{isBlocked.reason}</span>
+                        <div className="bg-amber-50 border border-amber-200 rounded-xl p-2.5 text-xs text-amber-800 flex items-center justify-between">
+                          <div className="flex items-center gap-1.5 font-bold">
+                            <Ban className="w-3.5 h-3.5 text-amber-600" />
+                            <span>{isBlocked.reason}</span>
                           </div>
                           <button
                             onClick={() => onDeleteBlockedSlot(isBlocked.id)}
-                            className="text-[10px] text-amber-400/80 hover:text-amber-200 underline"
+                            className="text-[10px] text-amber-600 hover:text-amber-900 underline font-semibold"
                           >
                             Desbloquear
                           </button>
@@ -201,7 +200,7 @@ export const AgendaDayView: React.FC<AgendaDayViewProps> = ({
                         /* Empty slot click button */
                         <button
                           onClick={() => onOpenCreateWithTime(slotTime, staffMember.id)}
-                          className="w-full h-full min-h-[50px] border border-dashed border-slate-800 hover:border-indigo-500/40 rounded-xl flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all text-xs text-indigo-400 gap-1 bg-indigo-500/5"
+                          className="w-full h-full min-h-[50px] border border-dashed border-slate-200 hover:border-brand-400 rounded-xl flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all text-xs font-bold text-brand-600 gap-1 bg-brand-50/50"
                         >
                           <Plus className="w-3.5 h-3.5" />
                           <span>Agendar às {slotTime}</span>
