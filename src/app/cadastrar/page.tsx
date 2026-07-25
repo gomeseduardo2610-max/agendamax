@@ -34,7 +34,11 @@ export default function RegisterPage() {
         return;
       }
 
-      register(companyName, name, email);
+      if (data.user && data.company) {
+        register(data.company.name, data.user.name, data.user.email, data.company.id, data.user.id);
+      } else {
+        register(companyName, name, email);
+      }
       window.location.href = '/dashboard';
     } catch (err) {
       setErrorMsg('Falha na conexão com o servidor.');

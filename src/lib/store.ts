@@ -36,7 +36,7 @@ interface AgendaStore {
 
   // Auth actions
   login: (email: string) => boolean;
-  register: (companyName: string, name: string, email: string) => void;
+  register: (companyName: string, name: string, email: string, companyId?: string, userId?: string) => void;
   logout: () => void;
   updateCompany: (data: Partial<Company>) => void;
   updateUser: (data: Partial<User>) => void;
@@ -127,16 +127,16 @@ export const useAgendaStore = create<AgendaStore>()(
         });
         return true;
       },
-      register: (companyName: string, name: string, email: string) => {
+      register: (companyName: string, name: string, email: string, companyId?: string, userId?: string) => {
         const newCompany: Company = {
-          id: 'comp_' + Date.now(),
+          id: companyId || 'comp_' + Date.now(),
           name: companyName,
           slug: companyName.toLowerCase().replace(/\s+/g, '-'),
           phone: '(11) 90000-0000',
           email,
         };
         const newUser: User = {
-          id: 'usr_' + Date.now(),
+          id: userId || 'usr_' + Date.now(),
           name,
           email,
           role: 'ADMIN',
