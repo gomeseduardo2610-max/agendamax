@@ -120,7 +120,7 @@ export const AppointmentCard: React.FC<AppointmentCardProps> = ({
 
         {appointment.notes && (
           <p className="text-[11px] text-slate-400 italic line-clamp-1 bg-slate-950/40 p-1.5 rounded border border-slate-800/60">
-            "{appointment.notes}"
+            {`"${appointment.notes}"`}
           </p>
         )}
       </div>
