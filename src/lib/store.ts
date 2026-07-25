@@ -89,29 +89,8 @@ export const useAgendaStore = create<AgendaStore>()(
       services: initialServices,
       appointments: initialAppointments,
       transactions: initialTransactions,
-      blockedSlots: [
-        {
-          id: 'blk_1',
-          companyId: initialCompany.id,
-          staffId: 'stf_1',
-          date: new Date().toISOString().split('T')[0],
-          startTime: '12:00',
-          endTime: '13:00',
-          reason: 'Intervalo de Almoço',
-        },
-      ],
-      waitlist: [
-        {
-          id: 'wt_1',
-          companyId: initialCompany.id,
-          clientName: 'Roberto Alves',
-          phone: '(11) 98111-2222',
-          preferredDate: new Date().toISOString().split('T')[0],
-          serviceName: 'Limpeza de Pele Profunda',
-          notes: 'Aguardando desistência no período da tarde',
-          createdAt: new Date().toISOString().split('T')[0],
-        },
-      ],
+      blockedSlots: [],
+      waitlist: [],
 
       // Auth
       login: (email: string) => {
