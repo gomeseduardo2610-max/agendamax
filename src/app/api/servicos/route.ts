@@ -8,12 +8,16 @@ export async function GET() {
     return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
   }
 
-  const services = await prisma.service.findMany({
-    where: { companyId: session.companyId },
-    orderBy: { category: 'asc' },
-  });
-
-  return NextResponse.json(services);
+  try {
+    const services = await prisma.service.findMany({
+      where: { companyId: session.companyId },
+      orderBy: { category: 'asc' },
+    });
+    return NextResponse.json(services);
+  } catch (error) {
+    console.error('Error fetching services:', error);
+    return NextResponse.json([]);
+  }
 }
 
 export async function POST(request: Request) {

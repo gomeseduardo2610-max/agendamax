@@ -8,11 +8,15 @@ export async function GET() {
     return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
   }
 
-  const company = await prisma.company.findUnique({
-    where: { id: session.companyId },
-  });
-
-  return NextResponse.json(company);
+  try {
+    const company = await prisma.company.findUnique({
+      where: { id: session.companyId },
+    });
+    return NextResponse.json(company);
+  } catch (error) {
+    console.error('Error fetching company:', error);
+    return NextResponse.json(null);
+  }
 }
 
 export async function PUT(request: Request) {

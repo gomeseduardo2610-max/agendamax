@@ -9,12 +9,16 @@ export async function GET() {
     return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
   }
 
-  const transactions = await prisma.transaction.findMany({
-    where: { companyId: session.companyId },
-    orderBy: { date: 'desc' },
-  });
-
-  return NextResponse.json(transactions);
+  try {
+    const transactions = await prisma.transaction.findMany({
+      where: { companyId: session.companyId },
+      orderBy: { date: 'desc' },
+    });
+    return NextResponse.json(transactions);
+  } catch (error) {
+    console.error('Error fetching transactions:', error);
+    return NextResponse.json([]);
+  }
 }
 
 export async function POST(request: Request) {

@@ -30,17 +30,21 @@ export async function GET(request: Request) {
     };
   }
 
-  const appointments = await prisma.appointment.findMany({
-    where: whereClause,
-    include: {
-      client: true,
-      staff: true,
-      service: true,
-    },
-    orderBy: { startTime: 'asc' },
-  });
-
-  return NextResponse.json(appointments);
+  try {
+    const appointments = await prisma.appointment.findMany({
+      where: whereClause,
+      include: {
+        client: true,
+        staff: true,
+        service: true,
+      },
+      orderBy: { startTime: 'asc' },
+    });
+    return NextResponse.json(appointments);
+  } catch (error) {
+    console.error('Error fetching appointments:', error);
+    return NextResponse.json([]);
+  }
 }
 
 export async function POST(request: Request) {

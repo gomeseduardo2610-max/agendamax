@@ -8,12 +8,16 @@ export async function GET() {
     return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
   }
 
-  const staff = await prisma.staff.findMany({
-    where: { companyId: session.companyId },
-    orderBy: { name: 'asc' },
-  });
-
-  return NextResponse.json(staff);
+  try {
+    const staff = await prisma.staff.findMany({
+      where: { companyId: session.companyId },
+      orderBy: { name: 'asc' },
+    });
+    return NextResponse.json(staff);
+  } catch (error) {
+    console.error('Error fetching staff:', error);
+    return NextResponse.json([]);
+  }
 }
 
 export async function POST(request: Request) {
