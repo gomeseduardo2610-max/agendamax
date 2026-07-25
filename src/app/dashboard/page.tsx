@@ -103,7 +103,8 @@ export default function DashboardPage() {
   const [selectedAppointment, setSelectedAppointment] = useState<any | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const { cancelAppointment, completeAppointment } = useAgendaStore();
+  const store = useAgendaStore();
+  const { cancelAppointment, completeAppointment } = store;
   const { addToast } = useToast();
 
   const fetchDashboardData = async () => {
@@ -113,8 +114,6 @@ export default function DashboardPage() {
       if (res.ok) {
         const data = await res.json();
         setStats(data);
-      } else {
-        addToast({ title: 'Erro de Carregamento', description: 'Erro ao carregar os dados em tempo real.', type: 'error' });
       }
     } catch (err) {
       console.error('Failed to fetch dashboard data:', err);
@@ -146,19 +145,32 @@ export default function DashboardPage() {
     fetchDashboardData();
   };
 
+  // Dynamic fallback calculation if stats is not provided by API
+  const todayStr = new Date().toISOString().split('T')[0];
+  const storeTodayAppointments = store.appointments.filter((a) => a.date === todayStr);
+
   const kpis = stats?.kpis || {
-    todayAppointmentsCount: 0,
-    weekAppointmentsCount: 0,
-    nextAppointment: null,
-    clientsCount: 0,
-    staffCount: 0,
-    servicesCount: 0,
-    monthRevenue: 0,
-    monthNetProfit: 0,
-    todayRevenue: 0,
-    cancellationsCount: 0,
-    completedAppointmentsCount: 0,
-    freeSlotsToday: 0,
+    todayAppointmentsCount: storeTodayAppointments.length,
+    weekAppointmentsCount: store.appointments.length,
+    nextAppointment: storeTodayAppointments[0]
+      ? {
+          id: storeTodayAppointments[0].id,
+          clientName: store.clients.find((c) => c.id === storeTodayAppointments[0].clientId)?.name || 'Cliente',
+          serviceName: store.services.find((s) => s.id === storeTodayAppointments[0].serviceId)?.name || 'Serviço',
+          staffName: store.staff.find((st) => st.id === storeTodayAppointments[0].staffId)?.name || 'Profissional',
+          time: storeTodayAppointments[0].startTime,
+          date: storeTodayAppointments[0].date,
+        }
+      : null,
+    clientsCount: store.clients.length,
+    staffCount: store.staff.length,
+    servicesCount: store.services.length,
+    monthRevenue: store.transactions.filter((t) => t.type === 'INCOME').reduce((a, b) => a + b.amount, 0),
+    monthNetProfit: store.transactions.reduce((a, b) => a + (b.type === 'INCOME' ? b.amount : -b.amount), 0),
+    todayRevenue: store.transactions.filter((t) => t.type === 'INCOME' && t.date === todayStr).reduce((a, b) => a + b.amount, 0),
+    cancellationsCount: store.appointments.filter((a) => a.status === 'CANCELLED').length,
+    completedAppointmentsCount: store.appointments.filter((a) => a.status === 'COMPLETED').length,
+    freeSlotsToday: Math.max(0, (store.staff.length || 1) * 8 - storeTodayAppointments.length),
   };
 
   const hasChartData = stats?.chartData?.some((d) => d.revenue > 0 || d.appointments > 0);

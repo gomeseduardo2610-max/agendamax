@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Sidebar from '@/components/layout/Sidebar';
 import Header from '@/components/layout/Header';
 import Modal from '@/components/ui/Modal';
@@ -28,7 +28,10 @@ import {
   Ban,
   ListPlus,
   Check,
+  AlertCircle,
+  Users,
 } from 'lucide-react';
+import Link from 'next/link';
 
 type CalendarView = 'DAY' | 'WEEK' | 'MONTH';
 
@@ -42,7 +45,6 @@ export default function AgendaPage() {
     blockedSlots,
     waitlist,
     addAppointment,
-    updateAppointment,
     cancelAppointment,
     completeAppointment,
     deleteAppointment,
@@ -63,9 +65,8 @@ export default function AgendaPage() {
   const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState<boolean>(false);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState<boolean>(false);
-  const [isEditModalOpen, setIsEditModalOpen] = useState<boolean>(false);
 
-  // New Modals for Blocked Slots & Waitlist
+  // Modals for Blocked Slots & Waitlist
   const [isBlockModalOpen, setIsBlockModalOpen] = useState<boolean>(false);
   const [isWaitlistModalOpen, setIsWaitlistModalOpen] = useState<boolean>(false);
 
@@ -87,6 +88,40 @@ export default function AgendaPage() {
   const [formStartTime, setFormStartTime] = useState('09:00');
   const [formNotes, setFormNotes] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
+
+  // Fetch real data on mount if available via API
+  useEffect(() => {
+    async function syncRealData() {
+      try {
+        const [aptsRes, cliRes, stfRes, srvRes] = await Promise.all([
+          fetch('/api/agendamentos').catch(() => null),
+          fetch('/api/clientes').catch(() => null),
+          fetch('/api/funcionarios').catch(() => null),
+          fetch('/api/servicos').catch(() => null),
+        ]);
+
+        if (aptsRes && aptsRes.ok) {
+          const apts = await aptsRes.json();
+          if (Array.isArray(apts)) useAgendaStore.setState({ appointments: apts });
+        }
+        if (cliRes && cliRes.ok) {
+          const clis = await cliRes.json();
+          if (Array.isArray(clis)) useAgendaStore.setState({ clients: clis });
+        }
+        if (stfRes && stfRes.ok) {
+          const stfs = await stfRes.json();
+          if (Array.isArray(stfs)) useAgendaStore.setState({ staff: stfs });
+        }
+        if (srvRes && srvRes.ok) {
+          const srvs = await srvRes.json();
+          if (Array.isArray(srvs)) useAgendaStore.setState({ services: srvs });
+        }
+      } catch (e) {
+        console.error('Failed to sync agenda real data:', e);
+      }
+    }
+    syncRealData();
+  }, []);
 
   // Helper for week view
   const weekDays = React.useMemo(() => {
@@ -184,6 +219,19 @@ export default function AgendaPage() {
     e.preventDefault();
     setErrorMessage('');
 
+    if (!formClientId) {
+      setErrorMessage('Por favor, selecione um cliente.');
+      return;
+    }
+    if (!formStaffId) {
+      setErrorMessage('Por favor, selecione um funcionário.');
+      return;
+    }
+    if (!formServiceId) {
+      setErrorMessage('Por favor, selecione um serviço.');
+      return;
+    }
+
     const service = services.find((s) => s.id === formServiceId);
     const endTime = getEndTime(formStartTime, formServiceId);
 
@@ -195,7 +243,7 @@ export default function AgendaPage() {
       startTime: formStartTime,
       endTime: endTime,
       status: 'CONFIRMED',
-      price: service ? service.price : 100,
+      price: service ? service.price : 0,
       notes: formNotes,
     });
 
@@ -207,7 +255,7 @@ export default function AgendaPage() {
       addToast({
         type: 'success',
         title: 'Agendamento Criado!',
-        description: `Horário ${formStartTime} reservado.`,
+        description: `Horário ${formStartTime} reservado com sucesso.`,
       });
     }
   };
@@ -284,6 +332,7 @@ export default function AgendaPage() {
                     weekday: 'short',
                     month: 'short',
                     day: 'numeric',
+                    year: 'numeric',
                   })}
                 </span>
               </div>
@@ -366,154 +415,177 @@ export default function AgendaPage() {
           {/* DAY VIEW */}
           {view === 'DAY' && (
             <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-              <div className="grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-slate-200">
-                {(selectedStaffFilter === 'ALL'
-                  ? staff
-                  : staff.filter((s) => s.id === selectedStaffFilter)
-                ).map((stf) => {
-                  const stfApts = filteredAppointments.filter(
-                    (a) => a.staffId === stf.id && a.date === selectedDateStr
-                  );
+              {staff.length === 0 ? (
+                <div className="p-12 text-center space-y-4">
+                  <UserCheck className="w-12 h-12 text-slate-300 mx-auto" />
+                  <h3 className="text-sm font-extrabold text-slate-800">Nenhum funcionário cadastrado</h3>
+                  <p className="text-xs text-slate-500 max-w-sm mx-auto">
+                    Para visualizar e organizar a agenda do dia, você precisa cadastrar os profissionais da sua equipe.
+                  </p>
+                  <Link
+                    href="/funcionarios"
+                    className="inline-flex items-center gap-2 px-4 py-2.5 bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold rounded-xl shadow-md transition-all"
+                  >
+                    <Plus className="w-4 h-4" />
+                    <span>Cadastrar Funcionário</span>
+                  </Link>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-slate-200">
+                  {(selectedStaffFilter === 'ALL'
+                    ? staff
+                    : staff.filter((s) => s.id === selectedStaffFilter)
+                  ).map((stf) => {
+                    const stfApts = filteredAppointments.filter(
+                      (a) => a.staffId === stf.id && a.date === selectedDateStr
+                    );
 
-                  return (
-                    <div key={stf.id} className="p-4 space-y-4">
-                      <div className="flex items-center gap-3 pb-3 border-b border-slate-100">
-                        <img
-                          src={stf.avatar}
-                          alt={stf.name}
-                          className="w-10 h-10 rounded-xl object-cover border border-slate-200"
-                        />
-                        <div>
-                          <h4 className="text-xs font-extrabold text-slate-900">{stf.name}</h4>
-                          <p className="text-[10px] text-brand-600 font-bold">{stf.role}</p>
+                    return (
+                      <div key={stf.id} className="p-4 space-y-4">
+                        <div className="flex items-center gap-3 pb-3 border-b border-slate-100">
+                          {stf.avatar ? (
+                            <img
+                              src={stf.avatar}
+                              alt={stf.name}
+                              className="w-10 h-10 rounded-xl object-cover border border-slate-200"
+                            />
+                          ) : (
+                            <div className="w-10 h-10 rounded-xl bg-brand-50 border border-brand-200 text-brand-600 flex items-center justify-center font-black text-sm">
+                              {stf.name.substring(0, 2).toUpperCase()}
+                            </div>
+                          )}
+                          <div>
+                            <h4 className="text-xs font-extrabold text-slate-900">{stf.name}</h4>
+                            <p className="text-[10px] text-brand-600 font-bold">{stf.role}</p>
+                          </div>
                         </div>
-                      </div>
 
-                      <div className="space-y-2">
-                        {timeSlots.map((time) => {
-                          const matchedApt = stfApts.find((a) => a.startTime === time);
-                          const matchedBlock = blockedSlots.find(
-                            (b) => b.staffId === stf.id && b.date === selectedDateStr && b.startTime === time
-                          );
+                        <div className="space-y-2">
+                          {timeSlots.map((time) => {
+                            const matchedApt = stfApts.find((a) => a.startTime === time);
+                            const matchedBlock = blockedSlots.find(
+                              (b) => b.staffId === stf.id && b.date === selectedDateStr && b.startTime === time
+                            );
 
-                          if (matchedBlock) {
-                            return (
-                              <div
-                                key={time}
-                                className="p-3 rounded-xl bg-slate-100 border border-slate-300 text-slate-700 flex items-center justify-between shadow-2xs"
-                              >
-                                <div className="flex items-center gap-2">
-                                  <Ban className="w-3.5 h-3.5 text-amber-600 shrink-0" />
-                                  <div>
-                                    <span className="text-xs font-bold text-slate-800 block">
-                                      {matchedBlock.startTime} - {matchedBlock.endTime}
+                            if (matchedBlock) {
+                              return (
+                                <div
+                                  key={time}
+                                  className="p-3 rounded-xl bg-slate-100 border border-slate-300 text-slate-700 flex items-center justify-between shadow-2xs"
+                                >
+                                  <div className="flex items-center gap-2">
+                                    <Ban className="w-3.5 h-3.5 text-amber-600 shrink-0" />
+                                    <div>
+                                      <span className="text-xs font-bold text-slate-800 block">
+                                        {matchedBlock.startTime} - {matchedBlock.endTime}
+                                      </span>
+                                      <span className="text-[10px] text-slate-500 font-medium">{matchedBlock.reason}</span>
+                                    </div>
+                                  </div>
+                                  <button
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      deleteBlockedSlot(matchedBlock.id);
+                                      addToast({ type: 'info', title: 'Horário Desbloqueado' });
+                                    }}
+                                    className="text-[10px] text-red-600 font-bold hover:underline"
+                                  >
+                                    Desbloquear
+                                  </button>
+                                </div>
+                              );
+                            }
+
+                            if (matchedApt) {
+                              const client = clients.find((c) => c.id === matchedApt.clientId);
+                              const service = services.find((s) => s.id === matchedApt.serviceId);
+
+                              const waUrl = client?.phone
+                                ? generateWhatsAppLink({
+                                    phone: client.phone,
+                                    clientName: client.name,
+                                    serviceName: service?.name || 'Atendimento',
+                                    date: matchedApt.date,
+                                    startTime: matchedApt.startTime,
+                                    staffName: stf.name,
+                                    companyName: company.name,
+                                  })
+                                : null;
+
+                              return (
+                                <div
+                                  key={time}
+                                  onClick={() => {
+                                    setSelectedAppointment(matchedApt);
+                                    setIsDetailModalOpen(true);
+                                  }}
+                                  className="p-3 rounded-xl bg-brand-50/60 border border-brand-200 hover:border-brand-400 cursor-pointer shadow-xs transition-all group"
+                                >
+                                  <div className="flex items-center justify-between mb-1">
+                                    <span className="text-xs font-extrabold text-brand-700">
+                                      {matchedApt.startTime} - {matchedApt.endTime}
                                     </span>
-                                    <span className="text-[10px] text-slate-500 font-medium">{matchedBlock.reason}</span>
+                                    <Badge status={matchedApt.status} />
+                                  </div>
+                                  <h5 className="text-xs font-bold text-slate-900 group-hover:text-brand-600">
+                                    {client?.name || 'Cliente'}
+                                  </h5>
+                                  <p className="text-[11px] text-slate-500 font-medium mt-0.5">
+                                    {service?.name || 'Serviço'} • R$ {matchedApt.price.toFixed(2)}
+                                  </p>
+
+                                  {/* Quick Action Buttons on Card */}
+                                  <div className="mt-2.5 pt-2 border-t border-brand-200/60 flex items-center justify-between">
+                                    {waUrl && (
+                                      <a
+                                        href={waUrl}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        onClick={(e) => e.stopPropagation()}
+                                        className="inline-flex items-center gap-1 px-2 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-[10px] font-bold shadow-2xs transition-colors"
+                                      >
+                                        <MessageCircle className="w-3 h-3" />
+                                        <span>WhatsApp</span>
+                                      </a>
+                                    )}
+
+                                    {matchedApt.status !== 'COMPLETED' && (
+                                      <button
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          completeAppointment(matchedApt.id);
+                                          addToast({ type: 'success', title: 'Concluído!', description: 'Receita registrada no caixa.' });
+                                        }}
+                                        className="inline-flex items-center gap-1 px-2 py-1 bg-white hover:bg-slate-100 text-emerald-700 border border-emerald-200 rounded-lg text-[10px] font-bold transition-colors ml-auto"
+                                      >
+                                        <Check className="w-3 h-3 text-emerald-600" />
+                                        <span>Concluir</span>
+                                      </button>
+                                    )}
                                   </div>
                                 </div>
-                                <button
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    deleteBlockedSlot(matchedBlock.id);
-                                    addToast({ type: 'info', title: 'Horário Desbloqueado' });
-                                  }}
-                                  className="text-[10px] text-red-600 font-bold hover:underline"
-                                >
-                                  Desbloquear
-                                </button>
-                              </div>
-                            );
-                          }
-
-                          if (matchedApt) {
-                            const client = clients.find((c) => c.id === matchedApt.clientId);
-                            const service = services.find((s) => s.id === matchedApt.serviceId);
-
-                            const waUrl = client?.phone
-                              ? generateWhatsAppLink({
-                                  phone: client.phone,
-                                  clientName: client.name,
-                                  serviceName: service?.name || 'Atendimento',
-                                  date: matchedApt.date,
-                                  startTime: matchedApt.startTime,
-                                  staffName: stf.name,
-                                  companyName: company.name,
-                                })
-                              : null;
+                              );
+                            }
 
                             return (
-                              <div
+                              <button
                                 key={time}
-                                onClick={() => {
-                                  setSelectedAppointment(matchedApt);
-                                  setIsDetailModalOpen(true);
-                                }}
-                                className="p-3 rounded-xl bg-brand-50/60 border border-brand-200 hover:border-brand-400 cursor-pointer shadow-xs transition-all group"
+                                onClick={() => handleOpenCreateModal(time, stf.id)}
+                                className="w-full text-left px-3 py-2 rounded-xl bg-slate-50 border border-slate-200/80 hover:bg-slate-100 text-xs text-slate-500 font-semibold flex items-center justify-between group transition-all"
                               >
-                                <div className="flex items-center justify-between mb-1">
-                                  <span className="text-xs font-extrabold text-brand-700">
-                                    {matchedApt.startTime} - {matchedApt.endTime}
-                                  </span>
-                                  <Badge status={matchedApt.status} />
-                                </div>
-                                <h5 className="text-xs font-bold text-slate-900 group-hover:text-brand-600">
-                                  {client?.name || 'Cliente'}
-                                </h5>
-                                <p className="text-[11px] text-slate-500 font-medium mt-0.5">
-                                  {service?.name} • R$ {matchedApt.price.toFixed(2)}
-                                </p>
-
-                                {/* Quick Action Buttons on Card */}
-                                <div className="mt-2.5 pt-2 border-t border-brand-200/60 flex items-center justify-between">
-                                  {waUrl && (
-                                    <a
-                                      href={waUrl}
-                                      target="_blank"
-                                      rel="noopener noreferrer"
-                                      onClick={(e) => e.stopPropagation()}
-                                      className="inline-flex items-center gap-1 px-2 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-[10px] font-bold shadow-2xs transition-colors"
-                                    >
-                                      <MessageCircle className="w-3 h-3" />
-                                      <span>WhatsApp</span>
-                                    </a>
-                                  )}
-
-                                  {matchedApt.status !== 'COMPLETED' && (
-                                    <button
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                        completeAppointment(matchedApt.id);
-                                        addToast({ type: 'success', title: 'Concluído!', description: 'Receita registrada no caixa.' });
-                                      }}
-                                      className="inline-flex items-center gap-1 px-2 py-1 bg-white hover:bg-slate-100 text-emerald-700 border border-emerald-200 rounded-lg text-[10px] font-bold transition-colors ml-auto"
-                                    >
-                                      <Check className="w-3 h-3 text-emerald-600" />
-                                      <span>Concluir</span>
-                                    </button>
-                                  )}
-                                </div>
-                              </div>
+                                <span>{time}</span>
+                                <span className="text-[10px] text-slate-400 group-hover:text-brand-600 font-bold">
+                                  + Agendar
+                                </span>
+                              </button>
                             );
-                          }
-
-                          return (
-                            <button
-                              key={time}
-                              onClick={() => handleOpenCreateModal(time, stf.id)}
-                              className="w-full text-left px-3 py-2 rounded-xl bg-slate-50 border border-slate-200/80 hover:bg-slate-100 text-xs text-slate-500 font-semibold flex items-center justify-between group transition-all"
-                            >
-                              <span>{time}</span>
-                              <span className="text-[10px] text-slate-400 group-hover:text-brand-600 font-bold">
-                                + Agendar
-                              </span>
-                            </button>
-                          );
-                        })}
+                          })}
+                        </div>
                       </div>
-                    </div>
-                  );
-                })}
-              </div>
+                    );
+                  })}
+                </div>
+              )}
             </div>
           )}
 
@@ -577,7 +649,7 @@ export default function AgendaPage() {
                                 <span className="font-extrabold text-brand-700 text-[11px]">{apt.startTime}</span>
                                 <Badge status={apt.status} />
                               </div>
-                              <h5 className="font-bold text-slate-900 truncate mt-1">{client?.name}</h5>
+                              <h5 className="font-bold text-slate-900 truncate mt-1">{client?.name || 'Cliente'}</h5>
                               <p className="text-[10px] text-slate-500 truncate">{srv?.name} • {stf?.name}</p>
                             </div>
                           );
@@ -632,7 +704,7 @@ export default function AgendaPage() {
                               key={apt.id}
                               className="px-1.5 py-0.5 rounded bg-brand-50 border border-brand-200 text-[10px] font-semibold text-brand-800 truncate"
                             >
-                              {apt.startTime} {cli?.name}
+                              {apt.startTime} {cli?.name || 'Cliente'}
                             </div>
                           );
                         })}
@@ -677,10 +749,13 @@ export default function AgendaPage() {
                 </div>
 
                 <div className="space-y-2 text-xs font-medium text-slate-700">
-                  <p><strong className="text-slate-900">Cliente:</strong> {client?.name}</p>
-                  <p><strong className="text-slate-900">Serviço:</strong> {srv?.name}</p>
-                  <p><strong className="text-slate-900">Profissional:</strong> {stf?.name}</p>
-                  <p><strong className="text-slate-900">Horário:</strong> {selectedAppointment.date} às {selectedAppointment.startTime}</p>
+                  <p><strong className="text-slate-900">Cliente:</strong> {client?.name || 'Não informado'}</p>
+                  <p><strong className="text-slate-900">Serviço:</strong> {srv?.name || 'Não informado'}</p>
+                  <p><strong className="text-slate-900">Profissional:</strong> {stf?.name || 'Não informado'}</p>
+                  <p><strong className="text-slate-900">Horário:</strong> {selectedAppointment.date} às {selectedAppointment.startTime} - {selectedAppointment.endTime}</p>
+                  {selectedAppointment.notes && (
+                    <p><strong className="text-slate-900">Observações:</strong> {selectedAppointment.notes}</p>
+                  )}
                 </div>
 
                 <div className="pt-3 border-t border-slate-100 flex items-center justify-between">
@@ -692,7 +767,7 @@ export default function AgendaPage() {
                           setIsDetailModalOpen(false);
                           addToast({ type: 'success', title: 'Concluído!', description: 'Receita lançada no caixa.' });
                         }}
-                        className="px-3 py-1.5 bg-emerald-600 text-white text-xs font-bold rounded-xl"
+                        className="px-3 py-1.5 bg-emerald-600 text-white text-xs font-bold rounded-xl shadow-xs"
                       >
                         Concluir
                       </button>
@@ -702,7 +777,7 @@ export default function AgendaPage() {
                         onClick={() => {
                           cancelAppointment(selectedAppointment.id);
                           setIsDetailModalOpen(false);
-                          addToast({ type: 'info', title: 'Cancelado' });
+                          addToast({ type: 'info', title: 'Agendamento Cancelado' });
                         }}
                         className="px-3 py-1.5 bg-red-100 text-red-700 border border-red-200 text-xs font-bold rounded-xl"
                       >
@@ -717,7 +792,8 @@ export default function AgendaPage() {
                       setIsDetailModalOpen(false);
                       addToast({ type: 'info', title: 'Agendamento Removido' });
                     }}
-                    className="p-1.5 text-slate-400 hover:text-red-600"
+                    className="p-1.5 text-slate-400 hover:text-red-600 rounded-lg hover:bg-slate-100"
+                    title="Excluir agendamento"
                   >
                     <Trash2 className="w-4 h-4" />
                   </button>
@@ -735,47 +811,85 @@ export default function AgendaPage() {
         title="Novo Agendamento"
       >
         <form onSubmit={handleCreateSubmit} className="space-y-4">
-          <div>
-            <label className="block text-xs font-bold text-slate-700 mb-1">Cliente</label>
-            <select
-              required
-              value={formClientId}
-              onChange={(e) => setFormClientId(e.target.value)}
-              className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium text-slate-800"
-            >
-              {clients.map((c) => (
-                <option key={c.id} value={c.id}>{c.name}</option>
-              ))}
-            </select>
-          </div>
+          {errorMessage && (
+            <div className="p-3 rounded-xl bg-red-50 border border-red-200 text-xs font-bold text-red-700 flex items-center gap-2">
+              <AlertCircle className="w-4 h-4 shrink-0" />
+              <span>{errorMessage}</span>
+            </div>
+          )}
 
-          <div>
-            <label className="block text-xs font-bold text-slate-700 mb-1">Profissional</label>
-            <select
-              required
-              value={formStaffId}
-              onChange={(e) => setFormStaffId(e.target.value)}
-              className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium text-slate-800"
-            >
-              {staff.map((s) => (
-                <option key={s.id} value={s.id}>{s.name} ({s.role})</option>
-              ))}
-            </select>
-          </div>
+          {/* Validation Warnings for Empty Entities */}
+          {clients.length === 0 ? (
+            <div className="p-3 bg-amber-50 border border-amber-200 rounded-xl text-xs space-y-2">
+              <p className="font-bold text-amber-800">Você ainda não tem clientes cadastrados.</p>
+              <Link href="/clientes" className="inline-block font-extrabold text-brand-600 hover:underline">
+                + Ir para página de Clientes cadastrar
+              </Link>
+            </div>
+          ) : (
+            <div>
+              <label className="block text-xs font-bold text-slate-700 mb-1">Cliente</label>
+              <select
+                required
+                value={formClientId}
+                onChange={(e) => setFormClientId(e.target.value)}
+                className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium text-slate-800 focus:outline-none focus:border-brand-500"
+              >
+                <option value="">Selecione um cliente...</option>
+                {clients.map((c) => (
+                  <option key={c.id} value={c.id}>{c.name}</option>
+                ))}
+              </select>
+            </div>
+          )}
 
-          <div>
-            <label className="block text-xs font-bold text-slate-700 mb-1">Serviço</label>
-            <select
-              required
-              value={formServiceId}
-              onChange={(e) => setFormServiceId(e.target.value)}
-              className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium text-slate-800"
-            >
-              {services.map((srv) => (
-                <option key={srv.id} value={srv.id}>{srv.name} (R$ {srv.price.toFixed(2)})</option>
-              ))}
-            </select>
-          </div>
+          {staff.length === 0 ? (
+            <div className="p-3 bg-amber-50 border border-amber-200 rounded-xl text-xs space-y-2">
+              <p className="font-bold text-amber-800">Você ainda não tem funcionários cadastrados.</p>
+              <Link href="/funcionarios" className="inline-block font-extrabold text-brand-600 hover:underline">
+                + Ir para página de Funcionários cadastrar
+              </Link>
+            </div>
+          ) : (
+            <div>
+              <label className="block text-xs font-bold text-slate-700 mb-1">Profissional</label>
+              <select
+                required
+                value={formStaffId}
+                onChange={(e) => setFormStaffId(e.target.value)}
+                className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium text-slate-800 focus:outline-none focus:border-brand-500"
+              >
+                <option value="">Selecione um funcionário...</option>
+                {staff.map((s) => (
+                  <option key={s.id} value={s.id}>{s.name} ({s.role})</option>
+                ))}
+              </select>
+            </div>
+          )}
+
+          {services.length === 0 ? (
+            <div className="p-3 bg-amber-50 border border-amber-200 rounded-xl text-xs space-y-2">
+              <p className="font-bold text-amber-800">Você ainda não tem serviços cadastrados.</p>
+              <Link href="/servicos" className="inline-block font-extrabold text-brand-600 hover:underline">
+                + Ir para página de Serviços cadastrar
+              </Link>
+            </div>
+          ) : (
+            <div>
+              <label className="block text-xs font-bold text-slate-700 mb-1">Serviço</label>
+              <select
+                required
+                value={formServiceId}
+                onChange={(e) => setFormServiceId(e.target.value)}
+                className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium text-slate-800 focus:outline-none focus:border-brand-500"
+              >
+                <option value="">Selecione um serviço...</option>
+                {services.map((srv) => (
+                  <option key={srv.id} value={srv.id}>{srv.name} (R$ {srv.price.toFixed(2)})</option>
+                ))}
+              </select>
+            </div>
+          )}
 
           <div className="grid grid-cols-2 gap-3">
             <div>
@@ -789,7 +903,7 @@ export default function AgendaPage() {
               />
             </div>
             <div>
-              <label className="block text-xs font-bold text-slate-700 mb-1">Início</label>
+              <label className="block text-xs font-bold text-slate-700 mb-1">Horário de Início</label>
               <input
                 type="time"
                 required
@@ -798,6 +912,17 @@ export default function AgendaPage() {
                 className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium text-slate-800"
               />
             </div>
+          </div>
+
+          <div>
+            <label className="block text-xs font-bold text-slate-700 mb-1">Observações (Opcional)</label>
+            <textarea
+              value={formNotes}
+              onChange={(e) => setFormNotes(e.target.value)}
+              placeholder="Detalhes ou preferências do cliente..."
+              rows={2}
+              className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium text-slate-800"
+            />
           </div>
 
           <div className="pt-3 border-t border-slate-100 flex justify-end gap-3">
@@ -810,9 +935,10 @@ export default function AgendaPage() {
             </button>
             <button
               type="submit"
-              className="px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold rounded-xl shadow-md"
+              disabled={clients.length === 0 || staff.length === 0 || services.length === 0}
+              className="px-4 py-2 bg-brand-600 hover:bg-brand-700 disabled:opacity-50 text-white text-xs font-bold rounded-xl shadow-md transition-all"
             >
-              Confirmar
+              Confirmar Agendamento
             </button>
           </div>
         </form>
@@ -833,6 +959,7 @@ export default function AgendaPage() {
               onChange={(e) => setBlockStaffId(e.target.value)}
               className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium text-slate-800"
             >
+              <option value="">Selecione...</option>
               {staff.map((s) => (
                 <option key={s.id} value={s.id}>{s.name} ({s.role})</option>
               ))}
