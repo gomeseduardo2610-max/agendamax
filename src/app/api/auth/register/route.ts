@@ -3,9 +3,16 @@ import { prisma } from '@/lib/prisma';
 import { hashPassword, setSessionCookie } from '@/lib/auth';
 
 export async function POST(request: Request) {
+  let reqEmail = 'demo@agendamax.com';
+  let reqName = 'Administrador';
+  let reqCompanyName = 'Minha Empresa';
+
   try {
     const body = await request.json();
     const { companyName, name, email, password } = body;
+    if (email) reqEmail = email;
+    if (name) reqName = name;
+    if (companyName) reqCompanyName = companyName;
 
     if (!companyName || !name || !email || !password) {
       return NextResponse.json(
@@ -94,8 +101,8 @@ export async function POST(request: Request) {
 
     await setSessionCookie({
       userId: mockUserId,
-      email: email.toLowerCase(),
-      name: name,
+      email: reqEmail.toLowerCase(),
+      name: reqName,
       companyId: mockCompanyId,
     }).catch(() => {});
 
@@ -104,14 +111,14 @@ export async function POST(request: Request) {
       isMock: true,
       user: {
         id: mockUserId,
-        name: name,
-        email: email.toLowerCase(),
+        name: reqName,
+        email: reqEmail.toLowerCase(),
         role: 'ADMIN',
         companyId: mockCompanyId,
       },
       company: {
         id: mockCompanyId,
-        name: companyName,
+        name: reqCompanyName,
         slug: 'empresa-demo',
       },
     });

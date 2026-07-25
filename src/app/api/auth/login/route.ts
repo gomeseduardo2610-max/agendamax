@@ -3,9 +3,11 @@ import { prisma } from '@/lib/prisma';
 import { comparePassword, setSessionCookie } from '@/lib/auth';
 
 export async function POST(request: Request) {
+  let reqEmail = 'demo@agendamax.com';
   try {
     const body = await request.json();
     const { email, password } = body;
+    if (email) reqEmail = email;
 
     if (!email || !password) {
       return NextResponse.json(
@@ -65,7 +67,7 @@ export async function POST(request: Request) {
 
     await setSessionCookie({
       userId: mockUserId,
-      email: email.toLowerCase(),
+      email: reqEmail.toLowerCase(),
       name: 'Administrador Demo',
       companyId: mockCompanyId,
     }).catch(() => {});
@@ -76,7 +78,7 @@ export async function POST(request: Request) {
       user: {
         id: mockUserId,
         name: 'Administrador Demo',
-        email: email.toLowerCase(),
+        email: reqEmail.toLowerCase(),
         role: 'ADMIN',
         companyId: mockCompanyId,
       },
